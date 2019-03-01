@@ -1852,7 +1852,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute.overlayEntries.isEmpty);
     final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
     newRoute._navigator = this;
-    newRoute.install(_currentOverlayEntry);
+
+    final Function overlayForInstall = () {
+      if (removedRoutes.isNotEmpty) {
+        //overlay entries of top route
+        final List<OverlayEntry> overlayEntries = removedRoutes.first.overlayEntries;
+        if (overlayEntries.isNotEmpty) {
+          return overlayEntries.last;
+        }
+      }
+      return _currentOverlayEntry;
+    };
+    newRoute.install(overlayForInstall());
     _history.add(newRoute);
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
